@@ -23,11 +23,16 @@ class Calculator extends React.Component {
   constructor(props) {
     super(props);
     this.handleTemperatureChange = this.handleTemperatureChange.bind(this);
-    this.state = {temperature: '', scale: 'c'};
+    this.handleToggleMode = this.handleToggleMode.bind(this);
+    this.state = {temperature: '', scale: 'c', darkMode: false};
   }
 
   handleTemperatureChange(temperature) {
     this.setState(temperature);
+  }
+
+  handleToggleMode() {
+    this.setState(prevState => ({ darkMode: !prevState.darkMode }));
   }
 
   render() {
@@ -35,22 +40,23 @@ class Calculator extends React.Component {
     const temperature = this.state.temperature;
     const celsius = scale === 'f' ? tryConvert(temperature, toCelsius) : temperature;
     const fahrenheit = scale === 'c' ? tryConvert(temperature, toFahrenheit) : temperature;
-
+    const darkMode = this.state.darkMode;
+    const rootClass = darkMode ? 'dark-mode' : 'light-mode';
     return (
-      <div>
+      <div className={rootClass}>
+        <button onClick={this.handleToggleMode} style={{marginBottom: '1em'}}>
+          Switch to {darkMode ? 'Light' : 'Dark'} Mode
+        </button>
         <TemperatureInput
           scale="c"
           temperature={celsius}
           onTemperatureChange={this.handleTemperatureChange} />
-
         <TemperatureInput
           scale="f"
           temperature={fahrenheit}
           onTemperatureChange={this.handleTemperatureChange} />
-
         <BoilingVerdict
           celsius={parseFloat(celsius)} />
-
       </div>
     );
   }
@@ -101,6 +107,37 @@ function tryConvert(temperature, convert) {
   const rounded = Math.round(output * 1000) / 1000;
   return rounded.toString();
 }
+
+// Add dark/light mode styles
+const style = document.createElement('style');
+style.innerHTML = `
+  .dark-mode {
+    background: #222;
+    color: #eee;
+    min-height: 100vh;
+    padding: 2em;
+  }
+  .light-mode {
+    background: #fff;
+    color: #222;
+    min-height: 100vh;
+    padding: 2em;
+  }
+  button {
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: #444;
+    color: #fff;
+  }
+  .light-mode button {
+    background: #eee;
+    color: #222;
+    border: 1px solid #ccc;
+  }
+`;
+document.head.appendChild(style);
 
 ReactDOM.render(
   <Calculator />,
